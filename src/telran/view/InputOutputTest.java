@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class InputOutputTest {
 	InputOutput io = new ConsoleInputOutput();
 
-	//@Test
+	@Test
 	void readObjectTest() {
 		Integer[] array = io.readObject("Enter numbers separated by space", "no number ", s -> {
 
@@ -22,31 +22,31 @@ class InputOutputTest {
 
 	}
 
-	//@Test
+	@Test
 	void readIntMinMax() {
 		Integer res = io.readInt("Enter any number in range [1, 40]", "no number ", 1, 40);
 		io.writeLine(res);
 	}
 	
-	//@Test
+	@Test
 	void readLongTest() {
 		Long res = io.readLong("Enter number of type long", "no number ");
 		io.writeLine(res);
 	}
 	
-	//@Test
+	@Test
 	void readOptionsTest() {
 		String res = io.readOption("Enter options separated by space", "empty string", new ArrayList<String>());
 		io.writeLine(res);
 	}
 	
-	//@Test
+	@Test
 	void readDateTest() {
 		LocalDate res = io.readDate("Enter date in format YYYY-MM-DD", "not a date ");
 		io.writeLine(res);
 	}
 
-	//@Test
+	@Test
 	void readDateFormatTest() {
 		LocalDate res = io.readDate("Enter date in format dd/MM/yyyy", "not a date ", "dd/MM/yyyy");
 		io.writeLine(res);
