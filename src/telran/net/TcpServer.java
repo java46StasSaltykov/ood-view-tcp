@@ -12,6 +12,8 @@ public class TcpServer implements Runnable {
 	private ApplProtocol protocol;
 	private ExecutorService executor;
 	volatile boolean isShutdown = false;  
+	private int countConnections = 0;
+	private int threads;
 
 	public TcpServer(int port, ApplProtocol protocol, int nThreads) throws Exception {
 		this.port = port;
@@ -19,6 +21,7 @@ public class TcpServer implements Runnable {
 		executor = Executors.newFixedThreadPool(nThreads);
 		serverSocket = new ServerSocket(port);
 		serverSocket.setSoTimeout(ACCEPT_TIME_OUT);
+		this.threads = nThreads;
 	}
 
 	public TcpServer(int port, ApplProtocol protocol) throws Exception {
@@ -31,6 +34,7 @@ public class TcpServer implements Runnable {
 		while (!isShutdown) {
 			try {
 				Socket socket = serverSocket.accept();
+				countConnections++;
 				TcpClientServer clientServer = new TcpClientServer(socket, protocol, this);
 				executor.execute(clientServer);
 			} catch (SocketTimeoutException e) {
@@ -45,6 +49,14 @@ public class TcpServer implements Runnable {
 	public void shutdown() {
 		isShutdown = true;
 		executor.shutdown();
+	}
+
+	public int getCountConnections() {
+		return this.countConnections;
+	}
+
+	public int getNThreads() {
+		return this.threads;
 	}
 
 }
