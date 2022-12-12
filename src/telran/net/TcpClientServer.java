@@ -5,14 +5,14 @@ import java.io.*;
 
 public class TcpClientServer implements Runnable {
 	private static final int READ_TIMEOUT = 100;
-	private static final int CLIENT_IDLE_TIMEOUT = 600;
 	private Socket socket;
 	private ObjectInputStream input;
 	private ObjectOutputStream output;
 	private ApplProtocol protocol;
 	private TcpServer tcpServer;
-	private int idlePeriod = 0;
-	
+	private static final int CLIENT_IDLE_TIMEOUT = 60000;
+	private int idlePeriod;
+
 	public TcpClientServer(Socket socket, ApplProtocol protocol, TcpServer tcpServer) throws Exception {
 		this.protocol = protocol;
 		this.socket = socket;
@@ -27,13 +27,14 @@ public class TcpClientServer implements Runnable {
 		while (!tcpServer.isShutdown) {
 			try {
 				Request request = (Request) input.readObject();
-				if (request != null) {
-					idlePeriod = 0;
-				}
+				idlePeriod = 0;
 				Response response = protocol.getResponse(request);
 				output.writeObject(response);
 			} catch (SocketTimeoutException e) {
-				idlePeriod++;
+				idlePeriod += READ_TIMEOUT;
+				if (idlePeriod > CLIENT_IDLE_TIMEOUT && tcpServer.clientsCounter.get() > tcpServer.nThreads) {
+					break;
+				}
 			} catch (EOFException e) {
 				System.out.println("client closed connection");
 				break;
@@ -41,24 +42,19 @@ public class TcpClientServer implements Runnable {
 				System.out.println("abnormal closing connection " + e.getMessage());
 				break;
 			}
-			if (idlePeriod >= CLIENT_IDLE_TIMEOUT && tcpServer.getCountConnections() > tcpServer.getNThreads()) {
-				try {
-					socket.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				break;
-			}
 		}
-		if (tcpServer.isShutdown) {
-			System.out.println("client connection closed by server shutdown");
+		if (tcpServer.isShutdown | idlePeriod > CLIENT_IDLE_TIMEOUT) {
 			try {
 				socket.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+
+			}
+			if (tcpServer.isShutdown) {
+				System.out.println("client connection closed by server shutdown");
+			} else {
+				System.out.println("client connection closed due to Idle Timeout");
 			}
 		}
+		tcpServer.clientsCounter.getAndDecrement();
 	}
-
 }
-
