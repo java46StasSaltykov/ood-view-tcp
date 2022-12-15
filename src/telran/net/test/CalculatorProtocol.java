@@ -18,22 +18,17 @@ public class CalculatorProtocol implements ApplProtocol {
 	public Response getResponse(Request request) {
 		Response response;
 		try {
-			switch (request.requestType) {
-			case "add":
-				response = add(getArguments(request.requestData));
-				break;
-			case "subtract":
-				response = subtract(getArguments(request.requestData));
-				break;
-			case "divide":
-				response = divide(getArguments(request.requestData));
-				break;
-			case "multiply":
-				response = multiply(getArguments(request.requestData));
-				break;
-			default:
-				response = new Response(ResponseCode.WRONG_REQUEST_TYPE, request.requestType);
-			}
+//			switch(request.requestType) {
+//			case "add": response = add(getArguments(request.requestData)); break;
+//			case "subtract": response = subtract(getArguments(request.requestData)); break;
+//			case "divide": response = divide(getArguments(request.requestData)); break;
+//			case "multiply": response = multiply(getArguments(request.requestData)); break;
+//			default: response = new Response(ResponseCode.WRONG_REQUEST_TYPE, request.requestType);
+//			}
+			response = (Response) this.getClass().getDeclaredMethod(request.requestType, Double[].class).invoke(this,
+					new Object[] { getArguments(request.requestData) });
+		} catch (NoSuchMethodException e) {
+			response = new Response(ResponseCode.WRONG_REQUEST_TYPE, request.requestType + " unknown request");
 		} catch (Exception e) {
 			response = new Response(ResponseCode.WRONG_REQUEST_DATA, e.getMessage());
 		}

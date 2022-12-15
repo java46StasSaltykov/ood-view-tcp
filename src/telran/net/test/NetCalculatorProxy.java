@@ -16,7 +16,7 @@ public class NetCalculatorProxy implements Calculator, Closeable {
 	@Override
 	public double add(double op1, double op2) {
 		Double[] data = { op1, op2 };
-		return networkHandler.send("add", data);
+		return networkHandler.send("add1", data);
 	}
 
 	@Override
